@@ -8,7 +8,7 @@ def get_color_sequence_from_str(cell_sequence_str):
     return color_sequence
 
 def graph_circuits(circuits_list):
-    """Dictionary: {cell_sequence : (purposes_list, seen_count)}"""
+    """Dictionary: {cell_sequence : (purposes_list, seen_count, commands_list)}"""
     cell_sequence_dict = {}
 
     ordered_circuits = []
@@ -20,11 +20,13 @@ def graph_circuits(circuits_list):
         if not cell_sequence_str:
             continue
 
+        cell_commands_list = circ.get_cells_commands()
+
         print(cell_sequence_str, circ.global_id)
 
         # If this cell sequence has not been seen before, register it.
         if cell_sequence_str not in cell_sequence_dict:
-            cell_sequence_dict[cell_sequence_str] = [[circ.get_purpose_str()], 1]
+            cell_sequence_dict[cell_sequence_str] = [[circ.get_purpose_str()], 1, cell_commands_list]
             continue
 
         # If we get here, we have seen this before. Register it: add purposes
@@ -32,10 +34,13 @@ def graph_circuits(circuits_list):
         prev_entry = cell_sequence_dict[cell_sequence_str]
         prev_purposes = prev_entry[0]
         prev_seen_count = prev_entry[1]
+        prev_commands = prev_entry[2]
+
+#        assert(prev_commands == circ.get_cells_commands())
 
         if circ.get_purpose_str() not in prev_purposes:
             prev_purposes.append(circ.get_purpose_str())
-        cell_sequence_dict[cell_sequence_str] = [prev_purposes, prev_entry[1]+1]
+        cell_sequence_dict[cell_sequence_str] = [prev_purposes, prev_entry[1]+1, prev_commands]
 
     _graph(cell_sequence_dict)
 
@@ -51,7 +56,7 @@ def _graph(cell_sequence_dict):
     y1_values = []
     y2_values = []
 
-    for cell_sequence_str, (purposes_set, seen_count) in cell_sequence_dict.items():
+    for cell_sequence_str, (purposes_list, seen_count, commands_list) in cell_sequence_dict.items():
         color_sequence = get_color_sequence_from_str(cell_sequence_str)
         sequence_len = len(color_sequence)
 
@@ -60,11 +65,14 @@ def _graph(cell_sequence_dict):
         # change y coord relative to the circuit number
         y = [i]*sequence_len
         # add purposes to the y labels
-        y1_values.append("purposes: " + str(purposes_set))
-        y2_values.append("seen_count: " + str(seen_count))
+        y1_values.append("circuits seen: " + str(seen_count))
+        y2_values.append(str(purposes_list))
 
         ax1.scatter(x,y, color=color_sequence)
         ax2.scatter(x,y, color=color_sequence)
+
+        for c, command in enumerate(commands_list):
+            ax1.annotate(command, (c,i), fontsize="x-small")
 
         # Silly horizontal lines
         ax1.axhline(y=i, color='grey', linestyle='--', alpha=0.08)
@@ -83,7 +91,7 @@ def _graph(cell_sequence_dict):
     ax2.set_yticks(range(0, max_y+1, 1))
     ax2.yaxis.tick_right()
     ax2.yaxis.set_label_position("right")
-    ax2.set_yticklabels(y2_values)
+    ax2.set_yticklabels(y2_values, fontsize="small")
 
     ax1.set_xlabel('cells')
 

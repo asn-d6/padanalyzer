@@ -43,7 +43,7 @@ class Circuit(object):
 
         if 22 in self.purposes:
             assert(not purpose)
-            purpose = "path_bias_testing"
+            purpose = "path_bias"
 
         # If we still have not found the purpose, it's general
         if not purpose:
@@ -83,6 +83,14 @@ class Circuit(object):
             return None
 
         return cell_directions
+
+    def get_cells_commands(self):
+        commands = []
+        for i, cell in enumerate(self.cells):
+            if i >= 10:
+                break
+            commands.append(cell.command)
+        return commands
 
     def analyze_cells_verbose(self):
         """Print verbose cell details about this circuit (used in HS log)"""
