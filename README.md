@@ -16,3 +16,6 @@ You can see log_line.py for how these lines are parsed.
 After you collect a big enough log file, just do this:\
      `$ python3 padanalyzer.py tbb.log`
 
+I also added logs/0404_torbrowser_test.log as a sample log file you can try
+out.
+
