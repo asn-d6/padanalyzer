@@ -26,7 +26,15 @@ class HSLog(object):
 
         self.circuits[circuit.global_id] = circuit
 
-    def finalize_global_log(self):
+    def finalize_all_logs(self):
+        for global_id, circ in self.circuits.items():
+            # skip non-general circs
+            if circ.get_purpose_str() != 'general':
+                continue
+
+            circ.analyze_cells_groupby()
+
+    def finalize_grapher(self):
         """We have read all the log lines. Print info about ALL the cells"""
         grapher.graph_circuits(self.circuits)
 

@@ -1,3 +1,5 @@
+import itertools
+
 # Introduction circuit purposes
 CIRCUIT_PURPOSE_C_INTRODUCING = 6
 CIRCUIT_PURPOSE_C_INTRODUCE_ACK_WAIT = 7
@@ -99,6 +101,19 @@ class Circuit(object):
         for i, cell in enumerate(self.cells):
             print("{}: {}".format(i, cell))
 
+    def analyze_cells_groupby(self):
+        """Print cell details about this circuit but group together similar cells (used in HS log)"""
+        print("{} circuit {} was created at {}".format(self.circ_type, self.global_id, self.ts_str))
+        print("Relay cells:")
+
+        cells_no_ts = []
+        for cell in self.cells:
+            cells_no_ts.append(cell.str_no_ts())
+
+        count_dups = [sum(1 for _ in group) for _, group in itertools.groupby(cells_no_ts)]
+        for i, (cell_str, _) in enumerate(itertools.groupby(cells_no_ts)):
+            print("{}: {} x{}".format(i, cell_str, count_dups[i]))
+
     def figure_out_circ_type(self):
         """
         Check if this is an HSDir/RP/IP circuit and return it if so.
@@ -131,6 +146,10 @@ class Cell(object):
         return "{} {} {}".format(self.ts_str,
                                  "->" if self.is_outgoing else "<-",
                                  self.command)
+
+    def str_no_ts(self):
+        return "{} {}".format("->" if self.is_outgoing else "<-",
+                              self.command)
 
     def get_direction(self):
         return "-1" if self.is_outgoing else "+1"

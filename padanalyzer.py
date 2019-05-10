@@ -11,9 +11,10 @@ def analyze_logfile(f):
 
     for line_str in f:
         log_line.parse_log_line(line_str, hslog)
-    hslog.finalize_global_log()
 
-    #hslog.finalize_hs_log()
+#    hslog.finalize_all_logs()
+    hslog.finalize_grapher()
+#    hslog.finalize_hs_log()
 
 def main():
     if (len(sys.argv) != 2):
